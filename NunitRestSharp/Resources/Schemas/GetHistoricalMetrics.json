@@ -1,0 +1,62 @@
+{
+  "type": "object",
+  "properties": {
+    "paginationData": {
+      "type": "object",
+      "properties": {
+        "currentPage": {
+          "type": "integer"
+        },
+        "pageSize": {
+          "type": "integer"
+        },
+        "totalItems": {
+          "type": "integer"
+        },
+        "totalPages": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "type": "string"
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "sectionName",
+          "sectionOrder",
+          "sectionColor",
+          "showReference",
+          "categories"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "sectionName": {
+            "type": "string"
+          },
+          "sectionOrder": {
+            "type": "integer"
+          },
+          "sectionColor": {
+            "type": "string"
+          },
+          "showReference": {
+            "type": "boolean"
+          },
+          "categories": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

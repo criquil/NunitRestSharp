@@ -1,0 +1,62 @@
+trigger:
+  branches:
+    include:
+      - refs/heads/stage_master
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: refs/heads/stage_master
+jobs:
+- job: Job_1
+  displayName: Build Solution for CIO Now API Testing
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - checkout: self
+  
+  - task: NuGetToolInstaller@1
+    inputs:
+      versionSpec: '6.11.0'
+      checkLatest: true
+
+  - task: NuGetCommand@2
+    inputs:
+      command: 'restore'
+      restoreSolution: 'NunitRestSharp/NunitRestSharp.sln'
+
+  - task: VSBuild@1
+    inputs:
+      solution: 'NunitRestSharp/NunitRestSharp.sln'
+      platform: 'Any CPU'
+      configuration: 'Release'
+      msbuildArgs: /p:Configuration=Debug /p:Platform="Any CPU" /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactstagingdirectory)/WebApp.zip" /p:DeployIisAppPath="Default Web Site" /p:DebugType=pdbonly /p:Optimize=true
+      clean: true
+
+  - task: SASTScanTask@0
+    displayName: SASTScanTask
+    inputs:
+      air_id: 4818
+
+  - task: ApplicationCodeScan@0
+    displayName: ApplicationCodeScan
+    inputs:
+      air_id: 4818
+  - task: ApplicationCodeRemediatorTask@0
+    inputs:
+      airId: '4818'
+      notifyViaEmail: true
+      createRemediationBranch: true
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+    condition: succeededOrFailed()
+    inputs:
+      SourceFolder: NunitRestSharp
+      TargetFolder: $(build.artifactstagingdirectory)
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: CIONow_API_Testing_Stg'
+    condition: succeededOrFailed()
+    inputs:
+      PathtoPublish: '$(build.artifactstagingdirectory)'
+      ArtifactName: 'CIONow_API_Testing_Stg'
